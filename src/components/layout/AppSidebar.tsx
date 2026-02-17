@@ -8,7 +8,7 @@ interface AppSidebarProps {
 }
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/add-contact', icon: UserPlus, label: 'Add Contact' },
   { to: '/contacts', icon: Users, label: 'All Contacts' },
   { to: '/calendar', icon: CalendarHeart, label: 'Calendar' },
