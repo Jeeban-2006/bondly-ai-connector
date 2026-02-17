@@ -4,6 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
+import LandingPage from "./pages/LandingPage";
+import AuthPage from "./pages/AuthPage";
+import WelcomePage from "./pages/WelcomePage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import AddContact from "./pages/AddContact";
 import ContactProfile from "./pages/ContactProfile";
@@ -21,8 +25,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<Index />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/welcome" element={<WelcomePage />} />
+          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<Index />} />
             <Route path="/add-contact" element={<AddContact />} />
             <Route path="/contact/:id" element={<ContactProfile />} />
             <Route path="/contacts" element={<AllContacts />} />

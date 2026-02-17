@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { User, Bell, Shield, Palette, Moon, Sun, Save, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User, Bell, Shield, Palette, Moon, Sun, Save, Check, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 const SettingsPage = () => {
+  const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [name, setName] = useState('Alex Rivera');
   const [email, setEmail] = useState('alex@example.com');
@@ -172,6 +175,18 @@ const SettingsPage = () => {
         )}
       >
         {saved ? <><Check className="h-5 w-5 mr-2" /> Saved!</> : <><Save className="h-5 w-5 mr-2" /> Save Settings</>}
+      </Button>
+
+      {/* Logout */}
+      <Button
+        variant="outline"
+        onClick={async () => {
+          await supabase.auth.signOut();
+          navigate('/');
+        }}
+        className="w-full h-12 rounded-xl border-destructive text-destructive hover:bg-destructive/10 font-semibold"
+      >
+        <LogOut className="h-5 w-5 mr-2" /> Log Out
       </Button>
     </div>
   );
