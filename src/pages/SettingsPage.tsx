@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Bell, Shield, Palette, Moon, Sun, Save, Check, LogOut } from 'lucide-react';
+import { User, Bell, Shield, Palette, Save, Check, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -8,12 +8,14 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useProfile } from '@/hooks/useProfile';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
-  const [name, setName] = useState('Alex Rivera');
-  const [email, setEmail] = useState('alex@example.com');
+  const { profile, updateProfile } = useProfile();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [reminderDays, setReminderDays] = useState('7');
   const [notifications, setNotifications] = useState({
     email: true,
@@ -23,7 +25,19 @@ const SettingsPage = () => {
     weeklyDigest: false,
   });
 
-  const handleSave = () => {
+  useEffect(() => {
+    if (profile) {
+      setName(profile.display_name ?? '');
+      setEmail(profile.email ?? '');
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
+    const error = await updateProfile({ display_name: name });
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to save settings.', variant: 'destructive' });
+      return;
+    }
     setSaved(true);
     toast({ title: '✅ Settings saved!', description: 'Your preferences have been updated.' });
     setTimeout(() => setSaved(false), 2000);
