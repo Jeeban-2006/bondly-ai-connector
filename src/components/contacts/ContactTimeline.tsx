@@ -1,5 +1,4 @@
 import { Phone, MessageCircle, Users, Gift, StickyNote } from 'lucide-react';
-import { Interaction } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 
 const typeConfig: Record<string, { icon: typeof Phone; color: string }> = {
@@ -10,8 +9,15 @@ const typeConfig: Record<string, { icon: typeof Phone; color: string }> = {
   note: { icon: StickyNote, color: 'bg-secondary text-muted-foreground' },
 };
 
+interface TimelineInteraction {
+  id: string;
+  type: string;
+  date: string;
+  description: string;
+}
+
 interface ContactTimelineProps {
-  interactions: Interaction[];
+  interactions: TimelineInteraction[];
 }
 
 const ContactTimeline = ({ interactions }: ContactTimelineProps) => {
