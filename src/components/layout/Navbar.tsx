@@ -1,7 +1,8 @@
 import { Heart, Bell, Moon, Sun, Menu, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { getInitials, mockContacts } from '@/lib/mockData';
+import { getInitials } from '@/lib/mockData';
+import { useProfile } from '@/hooks/useProfile';
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -11,6 +12,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   const [isDark, setIsDark] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { profile } = useProfile();
   const notifRef = useRef<HTMLDivElement>(null);
 
   const notifications = [
@@ -111,9 +113,17 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
             )}
           </Button>
 
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity">
-            {getInitials('Alex Rivera')}
-          </div>
+          {profile?.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt="Profile"
+              className="w-9 h-9 rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity">
+              {getInitials(profile?.display_name || profile?.email || 'U')}
+            </div>
+          )}
         </div>
       </div>
     </header>
