@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Bell, Shield, Palette, Save, Check, LogOut } from 'lucide-react';
+import { User, Bell, Shield, Palette, Save, Check, LogOut, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -9,13 +9,16 @@ import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
+import { getInitials } from '@/lib/mockData';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile, session } = useProfile();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [reminderDays, setReminderDays] = useState('7');
   const [notifications, setNotifications] = useState({
     email: true,
@@ -32,6 +35,24 @@ const SettingsPage = () => {
     }
   }, [profile]);
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !session) return;
+    setAvatarUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `${session.user.id}/avatar.${ext}`;
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: 'Upload failed', description: uploadError.message, variant: 'destructive' });
+      setAvatarUploading(false);
+      return;
+    }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('user_id', session.user.id);
+    toast({ title: '✅ Avatar updated!' });
+    window.location.reload();
+  };
+
   const handleSave = async () => {
     const error = await updateProfile({ display_name: name });
     if (error) {
@@ -43,32 +64,7 @@ const SettingsPage = () => {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const sections = [
-    {
-      id: 'profile',
-      icon: User,
-      title: 'Profile',
-      description: 'Your personal information',
-    },
-    {
-      id: 'notifications',
-      icon: Bell,
-      title: 'Notifications',
-      description: 'How you want to be reminded',
-    },
-    {
-      id: 'preferences',
-      icon: Palette,
-      title: 'Preferences',
-      description: 'Customize your experience',
-    },
-    {
-      id: 'privacy',
-      icon: Shield,
-      title: 'Privacy & Data',
-      description: 'Manage your data',
-    },
-  ];
+
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -89,6 +85,30 @@ const SettingsPage = () => {
           </div>
         </div>
         <Separator className="bg-border" />
+        {/* Avatar upload */}
+        <div className="flex items-center gap-5">
+          <div className="relative shrink-0">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Avatar" className="w-20 h-20 rounded-2xl object-cover" />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                {getInitials(profile?.display_name || profile?.email || 'U')}
+              </div>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={avatarUploading}
+              className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground hover:opacity-90 transition-opacity shadow-md"
+            >
+              <Camera className="h-4 w-4" />
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">{avatarUploading ? 'Uploading...' : 'Profile Photo'}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Click the camera icon to upload</p>
+          </div>
+        </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Full Name</label>
@@ -96,7 +116,7 @@ const SettingsPage = () => {
           </div>
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-xl h-11 bg-card border-border" />
+            <Input value={email} readOnly className="rounded-xl h-11 bg-card border-border opacity-70 cursor-not-allowed" />
           </div>
         </div>
       </div>

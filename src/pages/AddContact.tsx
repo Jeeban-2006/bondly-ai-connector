@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Check, Upload } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const AddContact = () => {
   const navigate = useNavigate();
@@ -21,26 +22,52 @@ const AddContact = () => {
   const [importance, setImportance] = useState([3]);
   const [birthday, setBirthday] = useState<Date>();
   const [notes, setNotes] = useState('');
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Simulated health based on importance
   const healthScore = Math.min(100, importance[0] * 20);
   const healthStatus = healthScore >= 70 ? 'strong' : healthScore >= 40 ? 'check' : 'overdue' as const;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name || !relationshipType) {
       toast({ title: 'Please fill in required fields', variant: 'destructive' });
       return;
     }
+    setSaving(true);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({ title: 'Not logged in', variant: 'destructive' });
+      setSaving(false);
+      return;
+    }
+
+    const { error } = await supabase.from('contacts').insert({
+      user_id: session.user.id,
+      name,
+      relationship_type: relationshipType,
+      importance: importance[0],
+      birthday: birthday ? format(birthday, 'yyyy-MM-dd') : null,
+      notes,
+      health_score: healthScore,
+      health_status: healthStatus,
+    });
+
+    if (error) {
+      toast({ title: 'Error saving contact', description: error.message, variant: 'destructive' });
+      setSaving(false);
+      return;
+    }
+
     setSaved(true);
     toast({ title: '✨ Contact saved!', description: `${name} has been added to your connections.` });
-    setTimeout(() => navigate('/'), 1500);
+    setTimeout(() => navigate('/contacts'), 1200);
   };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3 animate-in">
-        <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/')}>
+        <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/contacts')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
@@ -52,13 +79,6 @@ const AddContact = () => {
       <div className="grid md:grid-cols-3 gap-6">
         {/* Form */}
         <div className="md:col-span-2 space-y-5 animate-in animate-in-delay-1">
-          {/* Avatar upload */}
-          <div className="flex justify-center">
-            <div className="w-24 h-24 rounded-3xl bg-secondary border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:bg-muted transition-colors">
-              <Upload className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </div>
-
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Name *</label>
             <Input
@@ -90,9 +110,7 @@ const AddContact = () => {
             <Slider
               value={importance}
               onValueChange={setImportance}
-              min={1}
-              max={5}
-              step={1}
+              min={1} max={5} step={1}
               className="py-2"
             />
           </div>
@@ -103,10 +121,7 @@ const AddContact = () => {
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal rounded-xl h-11 bg-card border-border",
-                    !birthday && "text-muted-foreground"
-                  )}
+                  className={cn("w-full justify-start text-left font-normal rounded-xl h-11 bg-card border-border", !birthday && "text-muted-foreground")}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {birthday ? format(birthday, "PPP") : "Pick a date"}
@@ -136,17 +151,13 @@ const AddContact = () => {
 
           <Button
             onClick={handleSave}
-            disabled={saved}
+            disabled={saving || saved}
             className={cn(
               "w-full h-12 rounded-xl text-primary-foreground border-0 font-semibold",
               saved ? "bg-success" : "btn-primary-glow"
             )}
           >
-            {saved ? (
-              <><Check className="h-5 w-5 mr-2" /> Saved!</>
-            ) : (
-              'Save Contact'
-            )}
+            {saved ? <><Check className="h-5 w-5 mr-2" /> Saved!</> : saving ? 'Saving...' : 'Save Contact'}
           </Button>
         </div>
 
@@ -159,9 +170,7 @@ const AddContact = () => {
               <p className="font-semibold text-foreground">{name || 'New Contact'}</p>
               <p className="text-sm text-muted-foreground">{relationshipType || 'No type selected'}</p>
             </div>
-            <p className="text-xs text-muted-foreground italic">
-              Relationships grow when nurtured 🌱
-            </p>
+            <p className="text-xs text-muted-foreground italic">Relationships grow when nurtured 🌱</p>
           </div>
         </div>
       </div>

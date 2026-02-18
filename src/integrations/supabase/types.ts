@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      contacts: {
+        Row: {
+          avatar_url: string | null
+          birthday: string | null
+          created_at: string
+          health_score: number
+          health_status: string
+          id: string
+          importance: number
+          last_contacted: string | null
+          name: string
+          notes: string | null
+          relationship_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          birthday?: string | null
+          created_at?: string
+          health_score?: number
+          health_status?: string
+          id?: string
+          importance?: number
+          last_contacted?: string | null
+          name: string
+          notes?: string | null
+          relationship_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          birthday?: string | null
+          created_at?: string
+          health_score?: number
+          health_status?: string
+          id?: string
+          importance?: number
+          last_contacted?: string | null
+          name?: string
+          notes?: string | null
+          relationship_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interactions: {
+        Row: {
+          contact_id: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

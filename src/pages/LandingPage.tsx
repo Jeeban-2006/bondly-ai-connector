@@ -1,6 +1,8 @@
 import { Heart, ArrowRight, Users, Brain, Calendar, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
 const features = [
   { icon: Users, title: 'Track Relationships', desc: 'Never forget to check in with the people who matter most.' },
@@ -11,6 +13,13 @@ const features = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+
+  // If already logged in, go straight to dashboard
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate('/dashboard', { replace: true });
+    });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background" style={{ background: 'var(--gradient-bg)' }}>
