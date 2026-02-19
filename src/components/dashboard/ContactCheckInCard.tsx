@@ -4,11 +4,21 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import HealthIndicator from '@/components/contacts/HealthIndicator';
 import InteractionDialog from '@/components/contacts/InteractionDialog';
-import { Contact, getInitials, getAvatarColor } from '@/lib/mockData';
+import { getInitials, getAvatarColor } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 
+export interface DashboardContact {
+  id: string;
+  name: string;
+  relationship_type: string;
+  health_score: number;
+  health_status: string;
+  last_contacted: string | null;
+  avatar_url: string | null;
+}
+
 interface ContactCheckInCardProps {
-  contact: Contact;
+  contact: DashboardContact;
   animationDelay?: string;
 }
 
@@ -32,35 +42,43 @@ const ContactCheckInCard = ({ contact, animationDelay }: ContactCheckInCardProps
         onClick={() => navigate(`/contact/${contact.id}`)}
       >
         <div className="flex items-center gap-4">
-          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold text-primary-foreground shrink-0", getAvatarColor(contact.name))}>
-            {getInitials(contact.name)}
-          </div>
+          {contact.avatar_url ? (
+            <img
+              src={contact.avatar_url}
+              alt={contact.name}
+              className="w-12 h-12 rounded-2xl object-cover shrink-0"
+            />
+          ) : (
+            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold text-primary-foreground shrink-0", getAvatarColor(contact.name))}>
+              {getInitials(contact.name)}
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-semibold text-foreground truncate">{contact.name}</h3>
-              <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full", relationshipBadgeColors[contact.relationshipType])}>
-                {contact.relationshipType}
+              <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full", relationshipBadgeColors[contact.relationship_type] ?? 'bg-secondary text-muted-foreground')}>
+                {contact.relationship_type}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Last contacted {contact.lastContacted}
+              {contact.last_contacted ? `Last contacted ${contact.last_contacted}` : 'Never contacted'}
             </p>
 
             <div className="mt-2 w-full h-1.5 rounded-full bg-secondary overflow-hidden">
               <div
                 className={cn(
                   "h-full rounded-full transition-all duration-700",
-                  contact.healthStatus === 'strong' && 'bg-success',
-                  contact.healthStatus === 'check' && 'bg-warning',
-                  contact.healthStatus === 'overdue' && 'bg-destructive'
+                  contact.health_status === 'strong' && 'bg-success',
+                  contact.health_status === 'check' && 'bg-warning',
+                  contact.health_status === 'overdue' && 'bg-destructive'
                 )}
-                style={{ width: `${contact.healthScore}%` }}
+                style={{ width: `${contact.health_score}%` }}
               />
             </div>
           </div>
 
-          <HealthIndicator score={contact.healthScore} status={contact.healthStatus} size="sm" />
+          <HealthIndicator score={contact.health_score} status={contact.health_status as any} size="sm" />
 
           <div className="flex gap-1 shrink-0">
             <Button
