@@ -58,7 +58,12 @@ const AuthPage = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth('google');
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+        extraParams: {
+          prompt: 'select_account',
+        },
+      });
       if (result.error) {
         toast({ title: 'Error', description: result.error.message, variant: 'destructive' });
       }
