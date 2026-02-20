@@ -7,6 +7,7 @@ import AppLayout from "./components/layout/AppLayout";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import WelcomePage from "./pages/WelcomePage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import AddContact from "./pages/AddContact";
@@ -28,6 +29,8 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Index />} />
             <Route path="/add-contact" element={<AddContact />} />
