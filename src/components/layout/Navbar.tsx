@@ -1,5 +1,6 @@
 import { Heart, Bell, Moon, Sun, Menu, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/lib/mockData';
 import { useProfile } from '@/hooks/useProfile';
@@ -9,6 +10,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ onToggleSidebar }: NavbarProps) => {
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -117,10 +119,14 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
             <img
               src={profile.avatar_url}
               alt="Profile"
+              onClick={() => navigate('/settings')}
               className="w-9 h-9 rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity"
             />
           ) : (
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity">
+            <div
+              onClick={() => navigate('/settings')}
+              className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity"
+            >
               {getInitials(profile?.display_name || profile?.email || 'U')}
             </div>
           )}
