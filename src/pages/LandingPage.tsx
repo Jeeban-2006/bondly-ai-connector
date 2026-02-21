@@ -44,13 +44,13 @@ const LandingPage = () => {
       </header>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
-        <div className="animate-in">
+      <section className="max-w-6xl mx-auto px-6 pt-12 md:pt-20 pb-16 text-center">
+        <div className="stagger-children">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Heart className="h-4 w-4 fill-current" />
             AI Relationship Manager
           </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-foreground leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-foreground leading-tight tracking-tight">
             Nurture the bonds<br />
             <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
               that matter most
@@ -108,7 +108,7 @@ const LandingPage = () => {
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((f, i) => (
-            <div key={i} className="glass-card-static p-6 text-center animate-in" style={{ animationDelay: `${0.1 + i * 0.1}s` }}>
+            <div key={i} className="glass-card p-6 text-center animate-in" style={{ animationDelay: `${0.1 + i * 0.1}s` }}>
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <f.icon className="h-6 w-6 text-primary" />
               </div>
