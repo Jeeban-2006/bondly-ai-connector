@@ -237,3 +237,33 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+
+/* Mobile-friendly active/tap states (hover doesn't work on touch) */
+@media (hover: none) {
+  .glass-card:active {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary-glow:active {
+    box-shadow: 0 6px 28px -4px hsla(239, 84%, 67%, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-accent-glow:active {
+    box-shadow: 0 6px 28px -4px hsla(0, 100%, 71%, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+/* Staggered fade-in for children */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeSlideIn 0.4s ease-out forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }

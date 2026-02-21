@@ -101,7 +101,7 @@ const AuthPage = () => {
         Back to home
       </button>
 
-      <div className="w-full max-w-md space-y-8 animate-in">
+      <div className="w-full max-w-md space-y-8 stagger-children">
         {/* Logo */}
         <div className="text-center">
           <div className="w-14 h-14 rounded-2xl btn-primary-glow flex items-center justify-center mx-auto mb-4">
