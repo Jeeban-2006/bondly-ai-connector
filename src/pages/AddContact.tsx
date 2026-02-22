@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Import } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,24 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+// TypeScript declaration for Contact Picker API
+declare global {
+  interface ContactInfo {
+    name?: string[];
+    email?: string[];
+    tel?: string[];
+  }
+  interface Navigator {
+    contacts?: {
+      select: (
+        properties: string[],
+        options?: { multiple?: boolean }
+      ) => Promise<ContactInfo[]>;
+      getProperties: () => Promise<string[]>;
+    };
+  }
+}
+
 const AddContact = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -24,6 +42,29 @@ const AddContact = () => {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const isContactPickerSupported = typeof navigator !== 'undefined' && 'contacts' in navigator && 'select' in (navigator.contacts || {});
+
+  const handleImportContact = async () => {
+    if (!isContactPickerSupported) {
+      toast({
+        title: 'Not supported',
+        description: 'Contact import is only available on supported mobile browsers (Chrome on Android).',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      const contacts = await navigator.contacts!.select(['name', 'email', 'tel'], { multiple: false });
+      if (contacts.length > 0) {
+        const contact = contacts[0];
+        if (contact.name?.[0]) setName(contact.name[0]);
+        toast({ title: '📇 Contact imported!', description: `Imported ${contact.name?.[0] || 'contact'} from your device.` });
+      }
+    } catch {
+      // User cancelled the picker
+    }
+  };
 
   const healthScore = Math.min(100, importance[0] * 20);
   const healthStatus = healthScore >= 70 ? 'strong' : healthScore >= 40 ? 'check' : 'overdue' as const;
@@ -66,14 +107,25 @@ const AddContact = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3 animate-in">
-        <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/contacts')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Add Contact</h1>
-          <p className="text-sm text-muted-foreground">Nurture a new connection</p>
+      <div className="flex items-center justify-between animate-in">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/contacts')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Add Contact</h1>
+            <p className="text-sm text-muted-foreground">Nurture a new connection</p>
+          </div>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-xl gap-2 border-primary/30 text-primary hover:bg-primary/10"
+          onClick={handleImportContact}
+        >
+          <Import className="h-4 w-4" />
+          <span className="hidden sm:inline">Import</span>
+        </Button>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
