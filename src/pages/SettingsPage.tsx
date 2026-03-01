@@ -53,6 +53,33 @@ const SettingsPage = () => {
     window.location.reload();
   };
 
+  const handleExportData = async () => {
+    if (!session) return;
+    toast({ title: '⏳ Exporting...', description: 'Gathering your data...' });
+    try {
+      const [{ data: contacts }, { data: interactions }] = await Promise.all([
+        supabase.from('contacts').select('*'),
+        supabase.from('interactions').select('*'),
+      ]);
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        profile: { name: profile?.display_name, email: profile?.email },
+        contacts: contacts || [],
+        interactions: interactions || [],
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `my-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: '✅ Data exported!', description: 'Check your downloads folder.' });
+    } catch {
+      toast({ title: 'Export failed', variant: 'destructive' });
+    }
+  };
+
   const handleSave = async () => {
     const error = await updateProfile({ display_name: name });
     if (error) {
@@ -194,7 +221,7 @@ const SettingsPage = () => {
         </div>
         <Separator className="bg-border" />
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button variant="outline" className="rounded-xl border-border">Export My Data</Button>
+          <Button variant="outline" className="rounded-xl border-border" onClick={handleExportData}>Export My Data</Button>
           <Button variant="outline" className="rounded-xl border-destructive text-destructive hover:bg-destructive/10">Delete All Data</Button>
         </div>
       </div>
