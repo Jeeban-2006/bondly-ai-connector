@@ -1,73 +1,31 @@
-# Welcome to your Lovable project
+# Bondly AI Connector
 
-## Project info
+A full-stack relationship management application with AI features.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Project Structure
 
-## How can I edit this code?
+This is a monorepo containing both frontend and backend applications:
 
-There are several ways of editing your application.
+- `frontend/`: React + Vite + TypeScript frontend
+- `backend/`: Node.js/Express backend + Supabase
 
-**Use Lovable**
+## Current Status & What's Working
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+**Overall Status**: ⚠️ GOOD - Needs AI Enhancement (Production Ready: ~75%)
 
-Changes made via Lovable will be committed automatically to this repo.
+### ✅ What's Working Well
+- **Core Functionality**: User authentication (Email/Password), Contact management (CRUD), Dashboard with real-time stats, Profile management. Database integration with Supabase (RLS enabled).
+- **Responsive Design**: Mobile-first Tailwind CSS approach, flexible grid layouts.
+- **UI/UX**: Modern glassmorphic design, smooth animations, loading states, and toast notifications.
+- **Security**: JWT-based authentication, Row Level Security, Secure password handling.
+- **Backend & Frontend Servers**: Both are running and fully operational locally. Backend on port 3000, Frontend on port 8080.
 
-**Use your preferred IDE**
+### ⚠️ Critical Issues to Fix
+- **Calendar Page**: Currently using mock data, needs real data integration from Supabase.
+- **AI Message Generator**: Currently using hardcoded templates, needs real OpenAI API integration.
+- **Error Handling**: Needs a React Error Boundary to prevent full app crashes.
+- **Environment Config**: Missing `.env.example` for the frontend.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Documentation Navigation
+- [Implementation Details](implementation.md)
+- [Startup & Setup Guide](start_up.md)

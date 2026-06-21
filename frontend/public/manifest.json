@@ -1,0 +1,17 @@
+{
+  "name": "Bondly - AI Relationship Manager",
+  "short_name": "Bondly",
+  "description": "AI-powered relationship management platform to nurture your connections",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8B5CF6",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
