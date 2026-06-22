@@ -16,10 +16,7 @@
     "test": "npm run test --prefix frontend",
     "preview": "npm run preview --prefix frontend"
   },
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
+
   "keywords": [
     "react",
     "typescript",
