@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, RefreshCw, AlertCircle, TrendingUp, Heart } from 'lucide-react';
+import { Sparkles, Loader2, RefreshCw, AlertCircle, TrendingUp, Heart, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { apiFetch } from '@/lib/api';
 
 interface InsightData {
   wins: string[];
@@ -21,6 +22,7 @@ const RelationshipPulse = () => {
   const [insight, setInsight] = useState<DBInsight | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchExistingInsight = async () => {
@@ -56,22 +58,19 @@ const RelationshipPulse = () => {
 
   const handleRefresh = async () => {
     setGenerating(true);
+    setAiError(null);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data: contacts } = await supabase.from('contacts').select('*').eq('user_id', user.id);
       
-      const response = await fetch('http://localhost:3000/api/ai/insights', {
+      const resData = await apiFetch<{ success: boolean; insights: InsightData }>('/api/ai/insights', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contacts: contacts || [] }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate insights');
-      
-      const resData = await response.json();
-      const insightsData = resData.insights as InsightData;
+      const insightsData = resData.insights;
 
       // Save to Supabase
       const { data: inserted, error } = await supabase
@@ -85,7 +84,9 @@ const RelationshipPulse = () => {
       setInsight(inserted as DBInsight);
       toast({ title: 'Insights Refreshed!', description: 'Your relationship pulse is up to date.' });
     } catch (e) {
-      toast({ title: 'Refresh Failed', description: (e as Error).message, variant: 'destructive' });
+      const msg = (e as Error).message ?? 'Unable to generate insights right now. Please try again later.';
+      setAiError(msg);
+      toast({ title: 'Refresh Failed', description: msg, variant: 'destructive' });
     } finally {
       setGenerating(false);
     }
@@ -147,9 +148,23 @@ const RelationshipPulse = () => {
         </div>
 
         {!insight ? (
-          <div className="py-8 text-center text-muted-foreground">
-            <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-20" />
-            <p className="text-sm">Click generate to analyze your relationships using AI.</p>
+          <div className="py-10 text-center">
+            {aiError ? (
+              <div className="space-y-3">
+                <WifiOff className="w-10 h-10 mx-auto text-muted-foreground opacity-40" />
+                <p className="text-sm font-medium text-foreground">Unable to generate insights right now</p>
+                <p className="text-xs text-muted-foreground max-w-xs mx-auto">Please check that your backend is running and try again later.</p>
+                <Button variant="outline" size="sm" onClick={handleRefresh} disabled={generating} className="mt-2 rounded-xl">
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Try Again
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Sparkles className="w-10 h-10 mx-auto opacity-20" />
+                <p className="text-sm font-medium text-foreground">Generate your first Relationship Pulse</p>
+                <p className="text-xs text-muted-foreground max-w-xs mx-auto">Discover hidden patterns in your relationships using AI-powered analysis.</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-6">

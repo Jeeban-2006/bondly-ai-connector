@@ -3,6 +3,7 @@ import { Sparkles, Copy, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { apiFetch } from '@/lib/api';
 
 interface AIMessageGeneratorProps {
   contactName: string;
@@ -40,12 +41,11 @@ const AIMessageGenerator = ({
     setCopied(false);
 
     try {
-      const response = await fetch('http://localhost:3000/api/ai/generate-message', {
+      const data = await apiFetch<{ success: boolean; message: string }>('/api/ai/generate-message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contactName, 
-          tone, 
+        body: JSON.stringify({
+          contactName,
+          tone,
           length,
           relationshipType,
           importanceLevel,
@@ -55,13 +55,6 @@ const AIMessageGenerator = ({
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate message');
-      }
-
-      const data = await response.json();
-      
       if (!data.success || !data.message) {
         throw new Error('Invalid response from AI service');
       }

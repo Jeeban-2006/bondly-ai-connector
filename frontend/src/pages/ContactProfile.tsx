@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, MessageCircle, PenLine, Phone, Heart } from 'lucide-react';
+import { ArrowLeft, MessageCircle, PenLine, Phone, Heart, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import HealthIndicator from '@/components/contacts/HealthIndicator';
 import ContactTimeline from '@/components/contacts/ContactTimeline';
 import AIMessageGenerator from '@/components/contacts/AIMessageGenerator';
 import InteractionDialog from '@/components/contacts/InteractionDialog';
+import EditContactModal from '@/components/contacts/EditContactModal';
+import DeleteContactModal from '@/components/contacts/DeleteContactModal';
 import { getInitials, getAvatarColor } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -46,6 +48,8 @@ const ContactProfile = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'message' | 'log'>('log');
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const fetchData = async () => {
     const [contactRes, interactionsRes] = await Promise.all([
@@ -94,11 +98,34 @@ const ContactProfile = () => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center gap-3 animate-in">
-        <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/contacts')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+      <div className="flex items-center justify-between animate-in">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/contacts')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+        </div>
+        {/* Edit & Delete actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl border-border gap-1.5 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
+            onClick={() => setEditOpen(true)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl border-border gap-1.5 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/30 transition-all"
+            onClick={() => setDeleteOpen(true)}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete
+          </Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-5 gap-6">
@@ -186,6 +213,25 @@ const ContactProfile = () => {
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
           onSuccess={() => fetchData()}
+        />
+      )}
+
+      {contact && (
+        <EditContactModal
+          contact={contact}
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          onSuccess={() => fetchData()}
+        />
+      )}
+
+      {contact && (
+        <DeleteContactModal
+          contactId={contact.id}
+          contactName={contact.name}
+          open={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          onSuccess={() => navigate('/contacts')}
         />
       )}
     </div>

@@ -20,7 +20,25 @@ const WeeklyReview = () => {
     return <div className="glass-card p-6 h-40 animate-pulse bg-secondary/50" />;
   }
 
-  if (!review) return null;
+  if (!review) {
+    return (
+      <div className="space-y-4 animate-in">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Weekly Relationship Review</h2>
+        </div>
+        <div className="glass-card p-8 text-center space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+            <Sparkles className="w-7 h-7 text-primary opacity-60" />
+          </div>
+          <p className="text-sm font-medium text-foreground">Your weekly insights will appear here</p>
+          <p className="text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
+            Start logging interactions with your contacts to unlock weekly relationship insights and progress tracking.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 animate-in">

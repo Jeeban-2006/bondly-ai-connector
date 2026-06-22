@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { apiFetch } from '@/lib/api';
 
 export interface AppNotification {
   id: string;
@@ -114,23 +115,25 @@ export const useNotifications = () => {
 
       const { data: contacts } = await supabase.from('contacts').select('*').eq('user_id', user.id);
       
-      const response = await fetch('http://localhost:3000/api/ai/insights', {
+      const data = await apiFetch<{
+        success: boolean;
+        insights: { wins: string[]; attention_needed: string[]; growth_opportunities: string[] };
+      }>('/api/ai/insights', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contacts: contacts || [] }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch AI insights');
-      }
-
-      const data = await response.json();
       if (data.success && data.insights) {
-        const insightsArray = data.insights.split('\n').filter((line: string) => line.trim().length > 0);
+        // Flatten the structured insights object into a flat array of strings
+        const insightsArray: string[] = [
+          ...(data.insights.wins ?? []),
+          ...(data.insights.attention_needed ?? []),
+          ...(data.insights.growth_opportunities ?? []),
+        ].filter(Boolean);
+
         localStorage.setItem('bondly_ai_insights', JSON.stringify(insightsArray));
-        
         toast({ title: 'Insights Refreshed!', description: 'Your AI notifications have been updated.' });
-        loadNotifications(); // Reload all notifications to include the new insights
+        loadNotifications();
       }
     } catch (error) {
       toast({ title: 'AI Generation Failed', description: (error as Error).message, variant: 'destructive' });

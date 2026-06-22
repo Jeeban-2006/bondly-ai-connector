@@ -187,16 +187,16 @@ const LandingPage = () => {
       <section ref={heroRef} className="max-w-6xl mx-auto px-6 pt-12 md:pt-24 pb-16 text-center relative z-10">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 hero-badge backdrop-blur-sm border border-primary/20">
           <Sparkles className="h-4 w-4" />
-          AI Relationship Manager
+          AI-powered relationship care
         </div>
         <h1 className="hero-title text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-foreground leading-tight tracking-tight">
-          Nurture the bonds<br />
+          Never let important<br />
           <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
-            that matter most
+            relationships drift away.
           </span>
         </h1>
         <p className="hero-subtitle text-lg md:text-xl text-muted-foreground mt-6 max-w-2xl mx-auto leading-relaxed">
-          Bondly helps you stay connected with friends, family, and colleagues through intelligent reminders and AI-powered insights.
+          Bondly helps you remember, nurture, and strengthen meaningful relationships using AI-powered insights and reminders.
         </p>
         <div className="hero-buttons flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
           <Button
