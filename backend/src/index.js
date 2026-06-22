@@ -62,6 +62,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Welcome to Bondly AI Connector API Service',
+    status: 'online',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      api: '/api',
+    }
+  });
+});
+
 // API routes
 app.get('/api', (req, res) => {
   res.json({ 
