@@ -76,7 +76,7 @@
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react-swc": "^3.11.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -91,12 +91,11 @@
     "vitest": "^3.2.4"
   },
   "optionalDependencies": {
+    "@rollup/rollup-darwin-arm64": "^4.0.0",
+    "@rollup/rollup-darwin-x64": "^4.0.0",
+    "@rollup/rollup-linux-arm64-gnu": "^4.0.0",
     "@rollup/rollup-linux-x64-gnu": "^4.0.0",
     "@rollup/rollup-linux-x64-musl": "^4.0.0",
-    "@rollup/rollup-linux-arm64-gnu": "^4.0.0",
-    "@rollup/rollup-darwin-x64": "^4.0.0",
-    "@rollup/rollup-darwin-arm64": "^4.0.0",
     "@rollup/rollup-win32-x64-msvc": "^4.0.0"
   }
 }
-
