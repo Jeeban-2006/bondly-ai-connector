@@ -1,33 +1,17 @@
-import { GoogleGenAI } from '@google/genai';
 import OpenAI from 'openai';
 
-let aiClientType = 'gemini';
-let ai = null;
-let openaiClient = null;
+const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+const baseURL = process.env.GROQ_BASE_URL || process.env.OPENAI_BASE_URL || 'https://api.groq.com/openai/v1';
 
-// Determine client configuration based on environment variables
-if (process.env.GROQ_API_KEY || process.env.GROK_API_KEY || process.env.OPENAI_API_KEY) {
-  aiClientType = 'openai';
-  const apiKey = process.env.GROQ_API_KEY || process.env.GROK_API_KEY || process.env.OPENAI_API_KEY;
-  const baseURL = process.env.GROQ_BASE_URL || process.env.GROK_BASE_URL || process.env.OPENAI_BASE_URL || 
-                  (process.env.GROQ_API_KEY ? 'https://api.groq.com/openai/v1' : 
-                  (process.env.GROK_API_KEY ? 'https://api.x.ai/v1' : undefined));
-  
-  openaiClient = new OpenAI({ apiKey, baseURL });
-  console.log(`🤖 AI Service initialized: OpenAI-compatible client (Base URL: ${baseURL || 'default'})`);
-} else if (process.env.GEMINI_API_KEY) {
-  ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  console.log('🤖 AI Service initialized: Gemini client');
-} else {
-  console.warn('⚠️ No AI API keys configured (GEMINI_API_KEY, GROQ_API_KEY, GROK_API_KEY, or OPENAI_API_KEY). AI features will fail.');
+if (!apiKey) {
+  console.warn('⚠️ No AI API keys configured (GROQ_API_KEY or OPENAI_API_KEY). AI features will fail.');
 }
+
+const openaiClient = apiKey ? new OpenAI({ apiKey, baseURL }) : null;
 
 const getModel = () => {
   if (process.env.AI_MODEL) return process.env.AI_MODEL;
-  if (process.env.GROQ_API_KEY) return 'llama-3.3-70b-versatile';
-  if (process.env.GROK_API_KEY) return 'grok-beta';
-  if (process.env.OPENAI_API_KEY) return 'gpt-4o-mini';
-  return 'gemini-2.0-flash';
+  return 'llama-3.3-70b-versatile';
 };
 
 const TONE_MAP = {
@@ -53,8 +37,7 @@ export async function generateMessage({
   recentNotes = null,
   context = null,
 }) {
-  if (aiClientType === 'gemini' && !ai) throw new Error('GEMINI_API_KEY not configured.');
-  if (aiClientType === 'openai' && !openaiClient) throw new Error('OpenAI client not configured.');
+  if (!openaiClient) throw new Error('AI client (Groq/OpenAI) not configured.');
   
   if (!contactName) {
     throw new Error('contactName is required');
@@ -105,38 +88,21 @@ ${contextInfo ? `\nContext about this relationship:${contextInfo}` : ''}
 Remember: This should sound like something you'd actually text, not a formal email or template. Be real, be warm, and be specific to this person.`;
 
   try {
-    if (aiClientType === 'openai') {
-      const response = await openaiClient.chat.completions.create({
-        model: getModel(),
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.8,
-        max_tokens: lengthConfig.tokens,
-      });
+    const response = await openaiClient.chat.completions.create({
+      model: getModel(),
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.8,
+      max_tokens: lengthConfig.tokens,
+    });
 
-      const message = response.choices[0].message.content?.trim();
-      if (!message) {
-        throw new Error('AI provider returned an empty message');
-      }
-      return message;
-    } else {
-      const response = await ai.models.generateContent({
-        model: getModel(),
-        contents: userPrompt,
-        config: {
-          systemInstruction: systemPrompt,
-          temperature: 0.8,
-        }
-      });
-
-      const message = response.text?.trim();
-      if (!message) {
-        throw new Error('Gemini returned an empty message');
-      }
-      return message;
+    const message = response.choices[0].message.content?.trim();
+    if (!message) {
+      throw new Error('AI provider returned an empty message');
     }
+    return message;
   } catch (error) {
     if (error.message?.includes('API key')) {
       throw new Error('Invalid AI API key configuration.');
@@ -146,8 +112,7 @@ Remember: This should sound like something you'd actually text, not a formal ema
 }
 
 export async function generateInsights(contacts) {
-  if (aiClientType === 'gemini' && !ai) throw new Error('GEMINI_API_KEY not configured.');
-  if (aiClientType === 'openai' && !openaiClient) throw new Error('OpenAI client not configured.');
+  if (!openaiClient) throw new Error('AI client (Groq/OpenAI) not configured.');
   
   if (!Array.isArray(contacts)) {
     throw new Error('contacts must be an array');
@@ -188,59 +153,30 @@ ${contactsList}
 Focus on who needs attention, who you have strong bonds with, and specific actions they can take today.`;
 
   try {
-    if (aiClientType === 'openai') {
-      const response = await openaiClient.chat.completions.create({
-        model: getModel(),
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
-      });
+    const response = await openaiClient.chat.completions.create({
+      model: getModel(),
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      response_format: { type: "json_object" }
+    });
 
-      const insightsRaw = response.choices[0].message.content?.trim();
-      if (!insightsRaw) {
-        throw new Error('AI provider returned empty insights');
-      }
+    const insightsRaw = response.choices[0].message.content?.trim();
+    if (!insightsRaw) {
+      throw new Error('AI provider returned empty insights');
+    }
 
-      try {
-        const parsed = JSON.parse(insightsRaw);
-        return parsed;
-      } catch (e) {
-        return {
-          wins: [],
-          attention_needed: [insightsRaw],
-          growth_opportunities: []
-        };
-      }
-    } else {
-      const response = await ai.models.generateContent({
-        model: getModel(),
-        contents: userPrompt,
-        config: {
-          systemInstruction: systemPrompt,
-          temperature: 0.7,
-          responseMimeType: "application/json",
-        }
-      });
-
-      const insightsRaw = response.text?.trim();
-      if (!insightsRaw) {
-        throw new Error('Gemini returned empty insights');
-      }
-
-      try {
-        const parsed = JSON.parse(insightsRaw);
-        return parsed;
-      } catch (e) {
-        // Fallback if AI somehow messes up the JSON
-        return {
-          wins: [],
-          attention_needed: [insightsRaw],
-          growth_opportunities: []
-        };
-      }
+    try {
+      const parsed = JSON.parse(insightsRaw);
+      return parsed;
+    } catch (e) {
+      return {
+        wins: [],
+        attention_needed: [insightsRaw],
+        growth_opportunities: []
+      };
     }
   } catch (error) {
     throw error;

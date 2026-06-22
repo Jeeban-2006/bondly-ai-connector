@@ -46,7 +46,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok', 
     message: 'Bondly AI Connector Backend is running',
     timestamp: new Date().toISOString(),
-    ai: !!process.env.GEMINI_API_KEY,
+    ai: !!process.env.GROQ_API_KEY || !!process.env.OPENAI_API_KEY,
   });
 });
 
@@ -196,7 +196,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🤖 AI: ${process.env.GEMINI_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
+  console.log(`🤖 AI: ${process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY ? '✅ Configured (Groq/OpenAI)' : '❌ Not configured'}`);
 });
 
 export default app;
