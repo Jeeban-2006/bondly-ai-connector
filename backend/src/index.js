@@ -6,20 +6,8 @@ import { generateMessage, generateInsights } from './services/ai.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Production-safe CORS: only allow the configured frontend origin(s)
-const allowedOrigins = (
-  process.env.FRONTEND_URL ?? 'http://localhost:5173'
-).split(',').map(o => o.trim());
-
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow server-to-server requests (no origin) and listed origins
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS policy: origin ${origin} not allowed`));
-    }
-  },
+  origin: '*',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
